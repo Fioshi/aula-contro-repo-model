@@ -3,15 +3,18 @@ const Schema = mongoose.Schema;
 
 const schema = new Schema({
 
-    titulo: {
+    identificador: {
         type: String,
         required: true,
-        trim: true,
     },
-    price: {
-        type: Number,
+    titulo: {
+        type: String,
+        required: true
+    },
+    telefone: {
+        type: String,
         required: true
     }
 });
 
-module.exports = mongoose.model('Produto', schema)
+module.exports = mongoose.model('Ticket', schema)

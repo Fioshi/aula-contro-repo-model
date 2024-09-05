@@ -1,129 +1,107 @@
+const registro = require('../models/registro');
+const repository = require('../repositories/registro-repository');
+
 'use strict'
 
 const express = require('express')
 const router = new express.Router();
 
-//endpoint 
-router.get('/', (req, res, next) => {
-    res.status(200).send({
-        "nome": "Thiago Xavier"
-    });
-});
-
-
 // Obtendo o token do header Authorization
 //401 Unauthorized
-router.get('/private', (req, res) => {
-    // Obtendo o token do header Authorization
-    const token = req.headers['authorization'];
+// router.get('/private', (req, res) => {
+//     // Obtendo o token do header Authorization
+//     const token = req.headers['authorization'];
 
-    // Verificando se o token foi enviado e se é válido
-    if (!token || token !== 'meuTokenSecreto') {
-        // Retornando o status 401 Unauthorized se o token estiver ausente ou inválido
-        return res.status(401).send('Unauthorized: token inválido');	
-    }
+//     // Verificando se o token foi enviado e se é válido
+//     if (!token || token !== 'meuTokenSecreto') {
+//         // Retornando o status 401 Unauthorized se o token estiver ausente ou inválido
+//         return res.status(401).send('Unauthorized: token inválido');	
+//     }
 
-    // Se o token for válido, continuar com a requisição
-    res.send('Area privada permitida!').sendStatus(200);
-});
+//     // Se o token for válido, continuar com a requisição
+//     res.send('Area privada permitida!').sendStatus(200);
+// });
 
-const tokensDatabase = {
-    'tokenAdmin': { role: 'admin' },
-    'tokenUser': { role: 'user' },
-    'tokenGuest': { role: 'guest' },
-};
+// const tokensDatabase = {
+//     'tokenAdmin': { role: 'admin' },
+//     'tokenUser': { role: 'user' },
+//     'tokenGuest': { role: 'guest' },
+// };
 
 //Exemplo Forbidden 403
-router.get('/admin', (req, res) => {
-    // Obtendo o token do header Authorization
-    const token = req.headers['authorization'];
+// router.get('/admin', (req, res) => {
+//     // Obtendo o token do header Authorization
+//     const token = req.headers['authorization'];
 
-    // Verificando se o token foi enviado
-    if (!token) {
-        return res.status(401).send('Unauthorized: token não fornecido');
-    }
+//     // Verificando se o token foi enviado
+//     if (!token) {
+//         return res.status(401).send('Unauthorized: token não fornecido');
+//     }
 
-    const user = tokensDatabase[token];
-    if (!user) {
-        return res.status(401).send('Unauthorized: token inválido');
-    }
+//     const user = tokensDatabase[token];
+//     if (!user) {
+//         return res.status(401).send('Unauthorized: token inválido');
+//     }
 
-    // Verificando se o usuário tem acesso ao recurso administrativo
-    if (user.role !== 'admin') {
-        return res.status(403).send('Forbidden: você não tem permissão para acessar esta área');
-    }
+//     // Verificando se o usuário tem acesso ao recurso administrativo
+//     if (user.role !== 'admin') {
+//         return res.status(403).send('Forbidden: você não tem permissão para acessar esta área');
+//     }
 
-    res.send('Welcome to the admin area!');
-});
+//     res.send('Welcome to the admin area!');
+// });
 
 
-//Exemplo bad request 400
 router.post('/submit', (req, res) => {
-    const { username, email } = req.body;
+    const registro = { ticket, historico, idAtendente, motivo } = req.body;
 
     // Verificando se os campos obrigatórios estão presentes
-    if (!username || !email) {
-        return res.status(400).send('Favor preencher todos os campos: username e email.');
-    }
+    // if (!identificador || !titulo || !telefone) {
+    //     return res.status(400).send('Favor preencher todos os campos corretamente');
+    // }
 
-    // Simulando verificação de email válido 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        return res.status(400).send('Bad Request: Invalid email format');
-    }
-
-    // Se tudo estiver certo, continuar com o processamento
-    res.send('Data submitted successfully').status(202);
+    repository.create(registro)
+    
+    res.status(201).send('Created registro');
 });
 
-// Objeto para rastrear as requisições de cada IP
-const requestCounts = {};
-const RATE_LIMIT = 5; // Limite de requisições permitido
-const TIME_WINDOW = 60 * 1000; // Tempo da janela em milissegundos (1 minuto)
 
-// Middleware para rate limiting
-//Definição: Middleware é uma função em um aplicativo Express (ou outros frameworks) 
-//que processa requisições antes que elas cheguem à rota final ou resposta.
 
-router.use((req, res, next) => {
-    const ip = req.ip;
-    //console.log(ip)
-    if (!requestCounts[ip]) {
-        requestCounts[ip] = { count: 1, firstRequest: Date.now() };
-    } else {
-        requestCounts[ip].count++;
-    }
+// const requestCounts = {};
+// const RATE_LIMIT = 5; 
+// const TIME_WINDOW = 60 * 1000;
 
-    const currentTime = Date.now();
-    const timePassed = currentTime - requestCounts[ip].firstRequest;
+// router.use((req, res, next) => {
+//     const ip = req.ip;
+//     if (!requestCounts[ip]) {
+//         requestCounts[ip] = { count: 1, firstRequest: Date.now() };
+//     } else {
+//         requestCounts[ip].count++;
+//     }
 
-    if (timePassed < TIME_WINDOW && requestCounts[ip].count > RATE_LIMIT) {
-        return res.status(429).send('Too Many Requests: Please try again later.');
-    }
+//     const currentTime = Date.now();
+//     const timePassed = currentTime - requestCounts[ip].firstRequest;
 
-    if (timePassed >= TIME_WINDOW) {
-        requestCounts[ip].count = 1;
-        requestCounts[ip].firstRequest = Date.now();
-    }
+//     if (timePassed < TIME_WINDOW && requestCounts[ip].count > RATE_LIMIT) {
+//         return res.status(429).send('Too Many Requests: Please try again later.');
+//     }
 
-    next();
-});
+//     if (timePassed >= TIME_WINDOW) {
+//         requestCounts[ip].count = 1;
+//         requestCounts[ip].firstRequest = Date.now();
+//     }
+
+//     next();
+// });
 
 // Rota de exemplo com rate limiting
-router.get('/data', (req, res) => {
-    res.send('Aqui estão seus dados!');
+router.get('/', async (req, res) => {
+    const registros = await repository.get();
+    res.json(registros);
 })
 
-//Exemplo de erro 404 not found
-//Documentação: https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4
 
-let items = [
-    { id: 0, name: 'item1' },
-    { id: 1, name: 'item2' },
-    { id: 2, name: 'item3' }
-];
-
-router.get('/items/:id', (req, res) => {
+router.get('/registro/:id', (req, res) => {
     const itemId = parseInt(req.params.id, 10);
 
     // Verificando se o itemId é um número válido
